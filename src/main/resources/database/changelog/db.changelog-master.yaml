@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Gilberto_Junior
+      changes:
+        - sqlFile:
+            path: migrations/001-create-table-clientes.sql
+            relativeToChangelogFile: true
