@@ -45,9 +45,10 @@ nb-configuration.xml
 .certs/
 
 # Firebase
-resources/firebase/
+bsm-app-firebase-adminsdk.json
+
 
 # Maven
-.mvn/
-*.mvnw
+.mvn
 *.cmd
+/mvnw
