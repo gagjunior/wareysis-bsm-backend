@@ -1,0 +1,29 @@
+package br.com.wareysis.bsm.enumerations;
+
+public enum TiposPerfilUsuarioEnum {
+    ADM("ADMINISTRADOR"),
+    PROF("PROFISSIONAL"),
+    CLI("CLIENTE");
+
+    private final String descricao;
+
+    TiposPerfilUsuarioEnum(String descricao) {
+
+        this.descricao = descricao;
+    }
+
+    public String getDescricao() {
+
+        return descricao;
+    }
+
+    public static TiposPerfilUsuarioEnum fromDescricao(String descricao) {
+
+        for (TiposPerfilUsuarioEnum perfil : TiposPerfilUsuarioEnum.values()) {
+            if (perfil.getDescricao().equalsIgnoreCase(descricao)) {
+                return perfil;
+            }
+        }
+        throw new IllegalArgumentException(String.format("Nenhum perfil de usuário encontrado com a descrição: %s", descricao));
+    }
+}

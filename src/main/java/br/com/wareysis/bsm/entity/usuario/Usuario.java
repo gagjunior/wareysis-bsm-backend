@@ -1,5 +1,6 @@
 package br.com.wareysis.bsm.entity.usuario;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -16,48 +17,144 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 @Entity
 @Table(name = "USUARIOS")
 @RegisterForReflection
-public class Usuario extends PanacheEntityBase {
+public class Usuario extends PanacheEntityBase implements Serializable {
 
     @Id
-    public UUID id;
+    private UUID id;
 
     @Column(nullable = false, unique = true)
-    public String email;
+    private String email;
 
     @Column(name = "nome_completo", nullable = false)
-    public String nomeCompleto;
+    private String nomeCompleto;
 
-    public String cpf;
+    private String cpf;
 
-    public String telefone;
+    private String telefone;
 
     @Column(name = "email_verificado")
-    public boolean emailVerificado;
+    private Boolean emailVerificado;
 
-    public boolean habilitado;
+    private Boolean habilitado;
 
     @Column(name = "alterar_senha")
-    public boolean alterarSenha;
+    private Boolean alterarSenha;
 
     @Column(name = "dh_criacao")
-    public LocalDateTime dhCriacao;
+    private LocalDateTime dhCriacao;
 
     @Column(name = "dh_alteracao")
-    public LocalDateTime dhAlteracao;
+    private LocalDateTime dhAlteracao;
 
-    public Usuario() {
+    public UUID getId() {
 
+        return id;
+    }
+
+    public void setId(UUID id) {
+
+        this.id = id;
+    }
+
+    public String getEmail() {
+
+        return email;
+    }
+
+    public void setEmail(String email) {
+
+        this.email = email;
+    }
+
+    public String getNomeCompleto() {
+
+        return nomeCompleto;
+    }
+
+    public void setNomeCompleto(String nomeCompleto) {
+
+        this.nomeCompleto = nomeCompleto;
+    }
+
+    public String getCpf() {
+
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+
+        this.cpf = cpf;
+    }
+
+    public String getTelefone() {
+
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+
+        this.telefone = telefone;
+    }
+
+    public Boolean isEmailVerificado() {
+
+        return emailVerificado;
+    }
+
+    public void setEmailVerificado(Boolean emailVerificado) {
+
+        this.emailVerificado = emailVerificado;
+    }
+
+    public Boolean isHabilitado() {
+
+        return habilitado;
+    }
+
+    public void setHabilitado(Boolean habilitado) {
+
+        this.habilitado = habilitado;
+    }
+
+    public Boolean isAlterarSenha() {
+
+        return alterarSenha;
+    }
+
+    public void setAlterarSenha(Boolean alterarSenha) {
+
+        this.alterarSenha = alterarSenha;
+    }
+
+    public LocalDateTime getDhCriacao() {
+
+        return dhCriacao;
+    }
+
+    public void setDhCriacao(LocalDateTime dhCriacao) {
+
+        this.dhCriacao = dhCriacao;
+    }
+
+    public LocalDateTime getDhAlteracao() {
+
+        return dhAlteracao;
+    }
+
+    public void setDhAlteracao(LocalDateTime dhAlteracao) {
+
+        this.dhAlteracao = dhAlteracao;
     }
 
     @PrePersist
-    public void prePersist() {
+    private void prePersist() {
 
         dhCriacao = LocalDateTime.now();
         dhAlteracao = LocalDateTime.now();
     }
 
     @PreUpdate
-    public void preUpdate() {
+    private void preUpdate() {
 
         dhAlteracao = LocalDateTime.now();
     }

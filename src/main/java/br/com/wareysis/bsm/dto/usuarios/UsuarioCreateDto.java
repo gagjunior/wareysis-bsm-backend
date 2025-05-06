@@ -1,7 +1,13 @@
 package br.com.wareysis.bsm.dto.usuarios;
 
+import java.util.List;
+
+import br.com.wareysis.bsm.enumerations.TiposPerfilUsuarioEnum;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 public record UsuarioCreateDto(
 
@@ -17,7 +23,11 @@ public record UsuarioCreateDto(
 
         String cpf,
 
-        String telefone
+        String telefone,
+
+        @NotNull(message = "Lista de perfis não pode ser null")
+        @NotEmpty(message = "Lista de perfis não pode ser vazia")
+        List<TiposPerfilUsuarioEnum> perfis
 
 ) {
 

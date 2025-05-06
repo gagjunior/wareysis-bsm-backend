@@ -4,5 +4,21 @@ databaseChangeLog:
       author: Gilberto_Junior
       changes:
         - sqlFile:
-            path: migrations/001-create-table-clientes.sql
+            path: migrations/001-create-table-usuarios.sql
+            relativeToChangelogFile: true
+
+  - changeSet:
+      id: 2
+      author: Gilberto_Junior
+      changes:
+        - sqlFile:
+            path: migrations/002-create-table-tipos-perfil-usuario.sql
+            relativeToChangelogFile: true
+
+  - changeSet:
+      id: 3
+      author: Gilberto_Junior
+      changes:
+        - sqlFile:
+            path: migrations/003-create-table-usuarios-perfil.sql
             relativeToChangelogFile: true
