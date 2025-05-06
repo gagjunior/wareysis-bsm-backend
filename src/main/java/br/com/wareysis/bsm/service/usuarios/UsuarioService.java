@@ -27,9 +27,9 @@ public class UsuarioService {
     UsuarioFirebaseService usuarioFirebaseService;
 
     @Transactional
-    public Usuario createCliente(UsuarioCreateDto dto) {
+    public Usuario create(UsuarioCreateDto dto) {
 
-        UserRecord userRecord = usuarioFirebaseService.createClienteInFirebase(dto);
+        UserRecord userRecord = usuarioFirebaseService.createUserInFirebase(dto);
 
         log.info(String.format("BsmApp -> APP: Salvar usuário -> email: %s, nome: %s", dto.email(), dto.nomeCompleto()));
         Usuario usuario = new Usuario();

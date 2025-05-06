@@ -22,7 +22,7 @@ public class UsuarioController {
     @POST
     public Response create(@Valid UsuarioCreateDto dto) {
 
-        return Response.ok(service.createCliente(dto)).build();
+        return Response.ok(service.create(dto)).build();
 
     }
 

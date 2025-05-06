@@ -24,7 +24,7 @@ public class UsuarioFirebaseService {
     @Inject
     MessageService messageService;
 
-    public UserRecord createClienteInFirebase(UsuarioCreateDto dto) {
+    public UserRecord createUserInFirebase(UsuarioCreateDto dto) {
 
         log.info(String.format("BsmApp -> FIREBASE: Salvar usuário -> email: %s, nome: %s", dto.email(), dto.nomeCompleto()));
 
