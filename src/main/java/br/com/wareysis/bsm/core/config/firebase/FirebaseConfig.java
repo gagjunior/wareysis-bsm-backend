@@ -11,7 +11,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.FirebaseOptions;
 
-import br.com.wareysis.bsm.core.config.messages.MessageService;
+import br.com.wareysis.bsm.core.service.MessageService;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;

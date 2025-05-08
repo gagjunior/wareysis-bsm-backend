@@ -1,5 +1,7 @@
 package br.com.wareysis.bsm.controller.usuarios;
 
+import java.util.UUID;
+
 import br.com.wareysis.bsm.dto.usuarios.UsuarioCreateDto;
 import br.com.wareysis.bsm.dto.usuarios.UsuarioUpdateDto;
 import br.com.wareysis.bsm.service.usuarios.UsuarioService;
@@ -7,6 +9,7 @@ import br.com.wareysis.bsm.service.usuarios.UsuarioService;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -16,7 +19,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-@Path("/clientes")
+@Path("/usuarios")
 @Consumes("application/json")
 @Produces("application/json")
 public class UsuarioController {
@@ -40,6 +43,17 @@ public class UsuarioController {
         return Response
                 .status(Status.OK)
                 .entity(service.update(dto))
+                .build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response delete(@PathParam("id") String id) {
+
+        service.delete(UUID.fromString(id));
+
+        return Response
+                .status(Status.NO_CONTENT)
                 .build();
     }
 
@@ -69,6 +83,16 @@ public class UsuarioController {
         return Response
                 .status(Status.OK)
                 .entity(service.findByEmail(email))
+                .build();
+    }
+
+    @GET
+    @Path("/nome/{nome}")
+    public Response findByNome(@PathParam("nome") String nome) {
+
+        return Response
+                .status(Status.OK)
+                .entity(service.findByNome(nome))
                 .build();
     }
 

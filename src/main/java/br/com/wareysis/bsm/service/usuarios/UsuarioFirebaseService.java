@@ -11,12 +11,14 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 import com.google.firebase.auth.UserRecord.UpdateRequest;
 
-import br.com.wareysis.bsm.core.config.messages.MessageService;
+import br.com.wareysis.bsm.core.service.MessageService;
 import br.com.wareysis.bsm.dto.usuarios.UsuarioCreateDto;
 import br.com.wareysis.bsm.dto.usuarios.UsuarioUpdateDto;
+import br.com.wareysis.bsm.exceptions.usuarios.UsuarioException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response.Status;
 
 @ApplicationScoped
 public class UsuarioFirebaseService {
@@ -31,8 +33,8 @@ public class UsuarioFirebaseService {
 
         log.info(String.format("BsmApp -> FIREBASE: Salvar usuário -> email: %s, nome: %s", dto.email(), dto.nomeCompleto()));
 
-        if (clienteAlreadyExistsInFirbase(dto.email())) {
-            throw new RuntimeException(messageService.getMessage("usuario.create.alread.exists", dto.email(), dto.nomeCompleto()));
+        if (usuarioAlreadyExistsInFirbase(dto.email())) {
+            throw new UsuarioException(messageService.getMessage("usuario.create.alread.exists", dto.email(), dto.nomeCompleto()), Status.CONFLICT);
         }
 
         try {
@@ -41,12 +43,12 @@ public class UsuarioFirebaseService {
 
         } catch (Exception e) {
 
-            throw new RuntimeException(e.getMessage(), e);
+            throw new UsuarioException(e.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
 
     }
 
-    public UserRecord updateUserInFirebase(UsuarioUpdateDto dto) {
+    public void updateUserInFirebase(UsuarioUpdateDto dto) {
 
         log.info(String.format("BsmApp -> FIREBASE: Alterar usuário com uid %s", dto.id()));
 
@@ -55,14 +57,34 @@ public class UsuarioFirebaseService {
             UserRecord userRecord = FirebaseAuth.getInstance().getUser(dto.id().toString());
 
             if (userRecord == null) {
-                throw new RuntimeException(messageService.getMessage("usuario.update.not.found", dto.id()));
+                throw new UsuarioException(messageService.getMessage("usuario.uid.not.found", dto.id()), Status.BAD_REQUEST);
             }
 
-            return FirebaseAuth.getInstance().updateUser(updateRequestFirebase(dto));
+            FirebaseAuth.getInstance().updateUser(updateRequestFirebase(dto));
 
         } catch (FirebaseAuthException e) {
 
-            throw new RuntimeException(e);
+            throw new UsuarioException(e.getMessage(), Status.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    public void deleteUserInFirebase(String uid) {
+
+        try {
+
+            UserRecord userRecord = FirebaseAuth.getInstance().getUser(uid);
+
+            if (userRecord == null) {
+                throw new UsuarioException(messageService.getMessage("usuario.uid.not.found", uid), Status.BAD_REQUEST);
+            }
+
+            FirebaseAuth.getInstance().deleteUser(uid);
+            log.warn(String.format("Usuário com id: %s deletado do Firebase", uid));
+
+        } catch (FirebaseAuthException e) {
+
+            throw new UsuarioException(e.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
 
     }
@@ -99,14 +121,18 @@ public class UsuarioFirebaseService {
         request.setEmail(dto.email());
         request.setPassword(dto.senha());
         request.setDisplayName(dto.nomeCompleto());
-        request.setPhoneNumber(dto.telefone());
+
+        if (!StringUtils.isBlank(dto.telefone())) {
+            request.setPhoneNumber(dto.telefone());
+        }
+
         request.setDisabled(false);
         request.setEmailVerified(false);
 
         return request;
     }
 
-    private boolean clienteAlreadyExistsInFirbase(String email) {
+    private boolean usuarioAlreadyExistsInFirbase(String email) {
 
         try {
 
@@ -120,7 +146,7 @@ public class UsuarioFirebaseService {
                 return false;
 
             } else {
-                throw new RuntimeException(e.getMessage(), e);
+                throw new UsuarioException(e.getMessage(), Status.INTERNAL_SERVER_ERROR);
             }
 
         }

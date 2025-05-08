@@ -1,4 +1,4 @@
-package br.com.wareysis.bsm.core.config.messages;
+package br.com.wareysis.bsm.core.service;
 
 import java.text.MessageFormat;
 import java.util.Locale;

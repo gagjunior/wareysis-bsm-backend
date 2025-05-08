@@ -18,7 +18,7 @@ public record UsuarioCreateDto(
         @NotBlank(message = "Senha não pode ser vazia")
         String senha,
 
-        @NotBlank(message = "Nome completo não pode ser vazio")
+        @NotBlank(message = "Nome completo não pode ser vazio ou null")
         String nomeCompleto,
 
         String cpf,
