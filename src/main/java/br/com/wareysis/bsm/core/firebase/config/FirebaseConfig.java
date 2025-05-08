@@ -1,4 +1,4 @@
-package br.com.wareysis.bsm.core.config.firebase;
+package br.com.wareysis.bsm.core.firebase.config;
 
 import java.io.InputStream;
 
