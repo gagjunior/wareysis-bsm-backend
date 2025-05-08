@@ -23,6 +23,9 @@ public class FirebaseAuthFilter implements ContainerRequestFilter {
     @Inject
     Logger log;
 
+    @Inject
+    AuthenticatedUser authenticatedUser;
+
     @Override
     public void filter(ContainerRequestContext requestContext) {
 
@@ -43,7 +46,7 @@ public class FirebaseAuthFilter implements ContainerRequestFilter {
 
         try {
             FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
-            requestContext.setProperty("firebaseUser", decodedToken);
+            authenticatedUser.setToken(decodedToken);
         } catch (Exception e) {
             log.error("FIREBASE: Erro ao validar token", e);
             requestContext.abortWith(Response.status(Status.UNAUTHORIZED).build());

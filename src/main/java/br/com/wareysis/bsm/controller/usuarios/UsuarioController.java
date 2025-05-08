@@ -59,6 +59,17 @@ public class UsuarioController {
     }
 
     @GET
+    @Path("/authenticated")
+    public Response findAuthenticatedUser() {
+
+        return Response
+                .status(Status.OK)
+                .entity(service.findAuthenticatedUser())
+                .build();
+
+    }
+
+    @GET
     public Response findAll() {
 
         return Response
@@ -73,7 +84,7 @@ public class UsuarioController {
 
         return Response
                 .status(Status.OK)
-                .entity(service.findById(java.util.UUID.fromString(id)))
+                .entity(service.findById(UUID.fromString(id)))
                 .build();
     }
 

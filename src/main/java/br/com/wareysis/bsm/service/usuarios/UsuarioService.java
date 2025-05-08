@@ -9,6 +9,7 @@ import org.jboss.logging.Logger;
 
 import com.google.firebase.auth.UserRecord;
 
+import br.com.wareysis.bsm.core.firebase.auth.AuthenticatedUser;
 import br.com.wareysis.bsm.core.service.MessageService;
 import br.com.wareysis.bsm.dto.tipos.TipoPerfilUsuarioDto;
 import br.com.wareysis.bsm.dto.usuarios.UsuarioCreateDto;
@@ -47,6 +48,9 @@ public class UsuarioService {
 
     @Inject
     UsuarioRepository usuarioRepository;
+
+    @Inject
+    AuthenticatedUser authenticatedUser;
 
     private static final String USUARIO_UID_NOT_FOUND = "usuario.uid.not.found";
 
@@ -102,6 +106,17 @@ public class UsuarioService {
         usuario.delete();
 
         usuarioRepository.flush();
+    }
+
+    public UsuarioResponseDto findAuthenticatedUser() {
+
+        UUID id = UUID.fromString(authenticatedUser.getUid());
+
+        Usuario usuario = usuarioRepository.findByIdOptional(id)
+                .orElseThrow(() -> new UsuarioException(messageService.getMessage(USUARIO_UID_NOT_FOUND, id), Status.BAD_REQUEST));
+
+        return usuarioMapper.toDto(usuario, tipoPerfilUsuarioService.findTipoPerfisDto(id));
+
     }
 
     public List<UsuarioResponseDto> findAll() {
