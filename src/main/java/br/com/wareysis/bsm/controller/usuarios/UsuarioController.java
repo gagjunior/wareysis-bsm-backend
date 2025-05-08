@@ -28,6 +28,7 @@ public class UsuarioController {
     UsuarioService service;
 
     @POST
+    @Path("/registro")
     public Response create(@Valid UsuarioCreateDto dto) {
 
         return Response
