@@ -66,6 +66,6 @@ public class FirebaseAuthFilter implements ContainerRequestFilter {
     }
 
     private static final Set<String> publicPahts = Set.of(
-            "/usuarios/registro"
+            "/v1/usuarios/registro"
     );
 }

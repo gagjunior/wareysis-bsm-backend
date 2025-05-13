@@ -1,5 +1,7 @@
 package br.com.wareysis.bsm.enumerations;
 
+import java.util.Arrays;
+
 public enum TiposPerfilUsuarioEnum {
     ADM("ADMINISTRADOR"),
     PROF("PROFISSIONAL"),
@@ -19,11 +21,13 @@ public enum TiposPerfilUsuarioEnum {
 
     public static TiposPerfilUsuarioEnum fromDescricao(String descricao) {
 
-        for (TiposPerfilUsuarioEnum perfil : TiposPerfilUsuarioEnum.values()) {
-            if (perfil.getDescricao().equalsIgnoreCase(descricao)) {
-                return perfil;
-            }
-        }
-        throw new IllegalArgumentException(String.format("Nenhum perfil de usuário encontrado com a descrição: %s", descricao));
+        return Arrays.stream(values())
+                .filter(perfil -> perfil.descricao.equalsIgnoreCase(descricao))
+                .findFirst()
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                String.format("Nenhum perfil de usuário encontrado com a descrição: %s", descricao)
+                        )
+                );
     }
 }

@@ -19,7 +19,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-@Path("/usuarios")
+@Path("/v1/usuarios")
 @Consumes("application/json")
 @Produces("application/json")
 public class UsuarioController {
@@ -79,7 +79,7 @@ public class UsuarioController {
     }
 
     @GET
-    @Path("/id/{id}")
+    @Path("/{id}")
     public Response findById(@PathParam("id") String id) {
 
         return Response

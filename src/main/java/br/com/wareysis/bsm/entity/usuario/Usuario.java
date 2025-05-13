@@ -2,11 +2,15 @@ package br.com.wareysis.bsm.entity.usuario;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -45,6 +49,19 @@ public class Usuario extends PanacheEntityBase implements Serializable {
 
     @Column(name = "dh_alteracao")
     private LocalDateTime dhAlteracao;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<UsuarioPerfil> perfis;
+
+    public List<UsuarioPerfil> getPerfis() {
+
+        return perfis;
+    }
+
+    public void setPerfis(List<UsuarioPerfil> perfis) {
+
+        this.perfis = perfis;
+    }
 
     public UUID getId() {
 

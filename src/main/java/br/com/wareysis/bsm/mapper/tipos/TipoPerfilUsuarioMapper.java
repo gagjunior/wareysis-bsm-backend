@@ -1,7 +1,8 @@
 package br.com.wareysis.bsm.mapper.tipos;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
 import br.com.wareysis.bsm.dto.tipos.TipoPerfilUsuarioDto;
 import br.com.wareysis.bsm.entity.tipos.TipoPerfilUsuario;
@@ -9,9 +10,9 @@ import br.com.wareysis.bsm.entity.tipos.TipoPerfilUsuario;
 @Mapper(componentModel = "cdi")
 public interface TipoPerfilUsuarioMapper {
 
-    // Instância do Mapper
-    TipoPerfilUsuarioMapper INSTANCE = Mappers.getMapper(TipoPerfilUsuarioMapper.class);
-
-    // Método de mapeamento
+    // Método de mapeamento entre a entidade TipoPerfilUsuario e o DTO TipoPerfilUsuarioDto
     TipoPerfilUsuarioDto toDto(TipoPerfilUsuario entity);
+
+    // Método para mapear uma lista de TipoPerfilUsuario para uma lista de TipoPerfilUsuarioDto
+    List<TipoPerfilUsuarioDto> toDtoList(List<TipoPerfilUsuario> entities);
 }

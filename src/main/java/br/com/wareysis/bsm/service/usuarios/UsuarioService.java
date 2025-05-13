@@ -11,14 +11,18 @@ import com.google.firebase.auth.UserRecord;
 
 import br.com.wareysis.bsm.core.firebase.auth.AuthenticatedUser;
 import br.com.wareysis.bsm.core.service.MessageService;
-import br.com.wareysis.bsm.dto.tipos.TipoPerfilUsuarioDto;
 import br.com.wareysis.bsm.dto.usuarios.UsuarioCreateDto;
 import br.com.wareysis.bsm.dto.usuarios.UsuarioResponseDto;
 import br.com.wareysis.bsm.dto.usuarios.UsuarioUpdateDto;
+import br.com.wareysis.bsm.entity.tipos.TipoPerfilUsuario;
 import br.com.wareysis.bsm.entity.usuario.Usuario;
+import br.com.wareysis.bsm.entity.usuario.UsuarioPerfil;
+import br.com.wareysis.bsm.entity.usuario.UsuarioPerfilId;
+import br.com.wareysis.bsm.enumerations.TiposPerfilUsuarioEnum;
 import br.com.wareysis.bsm.exceptions.usuarios.UsuarioException;
 import br.com.wareysis.bsm.mapper.usuarios.UsuarioMapper;
 import br.com.wareysis.bsm.repository.usuarios.UsuarioRepository;
+import br.com.wareysis.bsm.service.tipos.TipoPerfilUsuarioService;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -59,14 +63,25 @@ public class UsuarioService {
 
         UserRecord userRecord = usuarioFirebaseService.createUserInFirebase(dto);
 
-        log.info(String.format("BsmApp -> APPLICATION: Salvar usuário -> email: %s, nome: %s", dto.email(), dto.nomeCompleto()));
+        try {
 
-        Usuario usuario = persistNovoUsuario(dto, userRecord);
-        usuarioPerfilService.persistNovosPerfis(usuario, dto.perfis());
+            log.info(String.format("BsmApp -> APPLICATION: Salvar usuário -> email: %s, nome: %s", dto.email(), dto.nomeCompleto()));
 
-        List<TipoPerfilUsuarioDto> perfilDtos = tipoPerfilUsuarioService.findTipoPerfisDto(usuario.getId());
+            Usuario usuario = persistNovoUsuario(dto, userRecord);
 
-        return usuarioMapper.toDto(usuario, perfilDtos);
+            return usuarioMapper.usuarioToUsuarioResponseDto(usuario);
+
+        } catch (Exception e) {
+
+            log.error(e.getMessage(), e);
+
+            if (userRecord != null) {
+                usuarioFirebaseService.deleteUserInFirebase(userRecord.getUid());
+            }
+
+            throw new UsuarioException(e.getMessage(), Status.INTERNAL_SERVER_ERROR);
+
+        }
 
     }
 
@@ -81,13 +96,12 @@ public class UsuarioService {
                 .orElseThrow(() -> new UsuarioException(messageService.getMessage(USUARIO_UID_NOT_FOUND, dto.id()), Status.BAD_REQUEST));
 
         updateUsuario(dto, usuario);
-        usuarioPerfilService.updatePerfis(usuario, dto.perfis());
+
+        usuario.persist();
 
         usuarioRepository.flush();
 
-        List<TipoPerfilUsuarioDto> perfilDtos = tipoPerfilUsuarioService.findTipoPerfisDto(usuario.getId());
-
-        return usuarioMapper.toDto(usuario, perfilDtos);
+        return usuarioMapper.usuarioToUsuarioResponseDto(usuario);
 
     }
 
@@ -115,7 +129,7 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByIdOptional(id)
                 .orElseThrow(() -> new UsuarioException(messageService.getMessage(USUARIO_UID_NOT_FOUND, id), Status.BAD_REQUEST));
 
-        return usuarioMapper.toDto(usuario, tipoPerfilUsuarioService.findTipoPerfisDto(id));
+        return usuarioMapper.usuarioToUsuarioResponseDto(usuario);
 
     }
 
@@ -127,8 +141,7 @@ public class UsuarioService {
 
         for (Usuario usuario : usuarioList) {
 
-            List<TipoPerfilUsuarioDto> perfilDtos = tipoPerfilUsuarioService.findTipoPerfisDto(usuario.getId());
-            UsuarioResponseDto usuarioResponseDto = usuarioMapper.toDto(usuario, perfilDtos);
+            UsuarioResponseDto usuarioResponseDto = usuarioMapper.usuarioToUsuarioResponseDto(usuario);
             usuarioResponseDtoList.add(usuarioResponseDto);
 
         }
@@ -141,9 +154,7 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByIdOptional(id)
                 .orElseThrow(() -> new UsuarioException(messageService.getMessage(USUARIO_UID_NOT_FOUND, id), Status.BAD_REQUEST));
 
-        List<TipoPerfilUsuarioDto> perfilDtos = tipoPerfilUsuarioService.findTipoPerfisDto(usuario.getId());
-
-        return usuarioMapper.toDto(usuario, perfilDtos);
+        return usuarioMapper.usuarioToUsuarioResponseDto(usuario);
     }
 
     public UsuarioResponseDto findByEmail(String email) {
@@ -151,9 +162,7 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsuarioException(messageService.getMessage("usuario.email.not.found", email), Status.BAD_REQUEST));
 
-        List<TipoPerfilUsuarioDto> perfilDtos = tipoPerfilUsuarioService.findTipoPerfisDto(usuario.getId());
-
-        return usuarioMapper.toDto(usuario, perfilDtos);
+        return usuarioMapper.usuarioToUsuarioResponseDto(usuario);
     }
 
     public List<UsuarioResponseDto> findByNome(String nome) {
@@ -168,8 +177,7 @@ public class UsuarioService {
 
         for (Usuario usuario : usuarioList) {
 
-            List<TipoPerfilUsuarioDto> perfilDtos = tipoPerfilUsuarioService.findTipoPerfisDto(usuario.getId());
-            UsuarioResponseDto usuarioResponseDto = usuarioMapper.toDto(usuario, perfilDtos);
+            UsuarioResponseDto usuarioResponseDto = usuarioMapper.usuarioToUsuarioResponseDto(usuario);
             usuarioResponseDtoList.add(usuarioResponseDto);
 
         }
@@ -217,10 +225,44 @@ public class UsuarioService {
         usuario.setHabilitado(true);
         usuario.setAlterarSenha(false);
 
+        associarPerfisAoUsuario(usuario, dto.perfis());
+
         usuario.persist();
 
         return usuario;
 
     }
 
+    private void associarPerfisAoUsuario(Usuario usuario, List<TiposPerfilUsuarioEnum> perfisEnum) {
+
+        if (usuario.getPerfis() == null) {
+            usuario.setPerfis(new ArrayList<>());
+        }
+
+        List<UsuarioPerfil> existentes = usuario.getPerfis();
+
+        for (TiposPerfilUsuarioEnum tipoPerfil : perfisEnum) {
+
+            boolean jaAssociado = existentes.stream()
+                    .anyMatch(up -> up.getId().idPerfil().equals(tipoPerfil));
+
+            if (!jaAssociado) {
+                TipoPerfilUsuario perfil = tipoPerfilUsuarioService.findById(tipoPerfil.name());
+
+                if (perfil == null) {
+                    throw new IllegalArgumentException("Perfil inválido: " + tipoPerfil.name());
+                }
+
+                UsuarioPerfil usuarioPerfil = new UsuarioPerfil();
+                usuarioPerfil.setId(new UsuarioPerfilId(usuario.getId(), tipoPerfil));
+                usuarioPerfil.setUsuario(usuario);
+                usuarioPerfil.setPerfil(perfil);
+
+                existentes.add(usuarioPerfil);
+            }
+        }
+    }
+
 }
+
+

@@ -1,9 +1,6 @@
 package br.com.wareysis.bsm.dto.usuarios;
 
-import java.util.List;
 import java.util.UUID;
-
-import br.com.wareysis.bsm.enumerations.TiposPerfilUsuarioEnum;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -22,9 +19,7 @@ public record UsuarioUpdateDto(
 
         Boolean habilitado,
 
-        Boolean alterarSenha,
-
-        List<TiposPerfilUsuarioEnum> perfis
+        Boolean alterarSenha
 ) {
 
 }

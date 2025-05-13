@@ -1,17 +1,17 @@
 package br.com.wareysis.bsm.service.usuarios;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import br.com.wareysis.bsm.entity.usuario.Usuario;
+import br.com.wareysis.bsm.dto.usuarios.UsuarioPerfilDeleteDto;
+import br.com.wareysis.bsm.dto.usuarios.UsuarioPerfilDto;
 import br.com.wareysis.bsm.entity.usuario.UsuarioPerfil;
 import br.com.wareysis.bsm.entity.usuario.UsuarioPerfilId;
-import br.com.wareysis.bsm.enumerations.TiposPerfilUsuarioEnum;
 import br.com.wareysis.bsm.repository.usuarios.UsuarioPerfilRepository;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class UsuarioPerfilService {
@@ -19,49 +19,28 @@ public class UsuarioPerfilService {
     @Inject
     UsuarioPerfilRepository repository;
 
-    public void updatePerfis(Usuario usuario, List<TiposPerfilUsuarioEnum> perfis) {
+    public List<UsuarioPerfilDto> findDtoListByPerfilId(String idPerfil) {
 
-        if (perfis == null || perfis.isEmpty()) {
-            return;
-        }
-
-        perfis.forEach(perfil -> {
-
-            UsuarioPerfilId perfilId = new UsuarioPerfilId(usuario.getId(), perfil.name());
-
-            UsuarioPerfil usuarioPerfil = repository.findByIdOptional(perfilId).orElse(null);
-
-            if (usuarioPerfil == null) {
-
-                usuarioPerfil = new UsuarioPerfil();
-                usuarioPerfil.setId(perfilId);
-
-                usuarioPerfil.persist();
-                usuario.setDhAlteracao(LocalDateTime.now());
-            }
-
-        });
-
-        repository.flush();
+        return repository.findDtoListByPerfilId(idPerfil);
     }
 
-    public void persistNovosPerfis(Usuario usuario, List<TiposPerfilUsuarioEnum> perfis) {
+    public List<UsuarioPerfil> findBbyIdUsuario(UUID idUsuario) {
 
-        for (TiposPerfilUsuarioEnum tipoPerfil : perfis) {
-
-            UsuarioPerfilId perfilId = new UsuarioPerfilId(usuario.getId(), tipoPerfil.name());
-
-            UsuarioPerfil usuarioPerfil = new UsuarioPerfil();
-            usuarioPerfil.setId(perfilId);
-
-            usuarioPerfil.persist();
-
-        }
+        return repository.find("id.idUsuario", idUsuario).list();
     }
 
     public List<UsuarioPerfil> findPerfis(UUID idUsuario) {
 
         return repository.find("id.idUsuario", idUsuario).list();
+    }
+
+    @Transactional
+    public void deleteByIdUsuario(UsuarioPerfilDeleteDto dto) {
+
+        dto.perfis().forEach(perfil -> repository.deleteById(new UsuarioPerfilId(dto.idUsuario(), perfil)));
+
+        repository.flush();
+
     }
 
 }
